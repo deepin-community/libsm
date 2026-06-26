@@ -1,3 +1,28 @@
+libsm (2:1.2.6-1) unstable; urgency=medium
+
+  * New upstream release.
+  * control: Fix -dev to depend on x11proto-dev instead of -core-dev.
+  * watch: Update upstream vcs url.
+  * control: Migrate to debhelper-compat, bump to 13.
+  * control: Migrate to pkgconf.
+  * rules: Drop old dbgsym migration.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 25 Mar 2025 15:14:52 +0200
+
+libsm (2:1.2.4-1) unstable; urgency=medium
+
+  [ Emilio Pozuelo Monfort ]
+  * Move doc build-deps to Build-Depends-Indep. Thanks Samuel Thibault.
+    Closes: #1055365.
+
+  [ Julien Cristau ]
+  * Add Alan Coopersmith's key to d/upstream/signing-key.asc.
+  * New upstream release
+    + Bump libice-dev build-dep to >= 2:1.1.0
+    + Add uuid-dev to libsm-dev dependencies for uuid.pc
+
+ -- Julien Cristau <jcristau@debian.org>  Thu, 31 Oct 2024 19:14:59 +0100
+
 libsm (2:1.2.3-1) unstable; urgency=medium
 
   * New upstream release.
