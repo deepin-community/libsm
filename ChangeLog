@@ -1,3 +1,322 @@
+commit 5f6da959a34bcefc425b6e37462553acf44369a3
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 8 17:35:22 2025 -0800
+
+    libSM 1.2.6
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 00040325385ab326b306477bcb175fd47468ac34
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Jan 18 16:18:05 2025 -0800
+
+    SmsGenerateClientID: simplify code to convert IPv4 address to hex string
+    
+    Instead of calling the deprecated inet_ntoa() to convert to an ascii
+    string, which we then break into 4 dotted segments and call atoi()
+    on each segment, just get the byte values from the in_addr_t directly,
+    much like we've long done for IPv6 addreses.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Part-of: <https://gitlab.freedesktop.org/xorg/lib/libsm/-/merge_requests/11>
+
+commit 91d1015f723e437b032eec95f5d82a0d5d52f43c
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Jan 13 16:41:28 2025 -0800
+
+    if getaddrinfo() is available, use it, even if IPv6 support is disabled
+    
+    Support for using getaddrinfo() was originally added to support IPv6,
+    and only used if IPv6 support was enabled.  Two decades later, support
+    for getaddrinfo() is ubiquitous and OS'es have marked gethostbyname()
+    as deprecated, so use the modern interface whenever we can now.
+    
+    Of course, in libSM, this only matters if one of the UUID generation
+    interfaces isn't being used instead.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Part-of: <https://gitlab.freedesktop.org/xorg/lib/libsm/-/merge_requests/11>
+
+commit 220fda5f4888b148b51ac6be3457670dd60a3c45
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Jan 13 15:41:40 2025 -0800
+
+    Simplify ifdefs for IPv6 support
+    
+    Instead of checking for AF_INET6 at every ifdef, just check once for it
+    and report that IPv6 support is not available, instead of silently not
+    building support for it that configure said we were going to build.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Part-of: <https://gitlab.freedesktop.org/xorg/lib/libsm/-/merge_requests/11>
+
+commit 8f133b4f0b03e32c044cda7c56f81c85d7b46c2d
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Jan 13 16:44:56 2025 -0800
+
+    sm_genid.c: simplify final fallback case
+    
+    Remove one level of #ifdef nesting to reach the final fallback of
+    return(NULL) if no id generation method was configured, neither
+    a UUID-based method nor the TCPCONN IP-address-based method.
+    
+    Part-of: <https://gitlab.freedesktop.org/xorg/lib/libsm/-/merge_requests/11>
+
+commit c68a06e0637244a81d7cce3797b22ece15c2fa2b
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Jan 13 16:28:22 2025 -0800
+
+    Skip network checks/headers/libraries if using UUID-based ids
+    
+    Currently network host address based ids are only used if neither
+    of the UUID generation methods is found by configure, so check them
+    first, and only do network checks as a fallback.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Part-of: <https://gitlab.freedesktop.org/xorg/lib/libsm/-/merge_requests/11>
+
+commit 83644d01d64a93a1fc463affc8bd9b30dc023a83
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Dec 13 14:11:23 2024 -0800
+
+    libSM 1.2.5
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit f1e6fc8e62a5da42ea713ee970028be3d32fcf85
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Aug 26 10:10:37 2024 -0700
+
+    IceReadCompleteMessage callers need to check if malloc() failed
+    
+    The IceReadCompleteMessage() macro may try to malloc() a buffer and
+    assign it to the final argument.
+    
+    Clears up 6 -Wanalyzer-null-dereference warnings from gcc 14.1
+    of the form:
+    
+    sm_process.c: In function ‘extractArray8’:
+    SMlibint.h:128:12: warning: dereference of NULL ‘pData’ [CWE-476]
+     [-Wanalyzer-null-dereference]
+      128 |     _val = *((CARD32 *) _pBuf); \
+          |            ^~~~~~~~~~~~~~~~~~~
+    sm_process.c:66:5: note: in expansion of macro ‘EXTRACT_CARD32’
+       66 |     EXTRACT_CARD32 (*pBuf, swap, n);
+          |     ^~~~~~~~~~~~~~
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Part-of: <https://gitlab.freedesktop.org/xorg/lib/libsm/-/merge_requests/9>
+
+commit bd243359c390b02bdb89e38779917996c6a38476
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Aug 26 09:36:41 2024 -0700
+
+    SmcOpenConnection: remove cast of return value from getenv()
+    
+    getenv() is defined as returning char *, so the cast isn't necessary
+    if you've included the header with the proper prototype for it.
+    
+    Clears gcc 14.1 warning:
+    
+    sm_client.c: In function ‘SmcOpenConnection’:
+    sm_client.c:114:20: warning: useless cast to type ‘char *’ [-Wuseless-cast]
+      114 |         if ((ids = (char *) getenv ("SESSION_MANAGER")) == NULL)
+          |                    ^
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Part-of: <https://gitlab.freedesktop.org/xorg/lib/libsm/-/merge_requests/9>
+
+commit 5edd20b307ce70ccb14c360f1b94914c49544a24
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Feb 17 15:05:20 2024 -0800
+
+    unifdef MNX_TCPCONN
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit d7783633c5935a2e45c065b1f385a35bbf56e7b1
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Feb 17 15:03:49 2024 -0800
+
+    unifdef __UNIXWARE__
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit d0b0f5e46af6da18a93a27a71e193fad8c7308b4
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Oct 13 13:11:28 2023 -0700
+
+    gitlab CI: add xz-utils to container for "make distcheck"
+    
+    Also update to latest ci-templates
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit f3706322c5c948cbbe434dd67d86de71eee25e17
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 4 10:44:45 2023 -0800
+
+    configure: Use LT_INIT from libtool 2 instead of deprecated AC_PROG_LIBTOOL
+    
+    AC_PROG_LIBTOOL was replaced by LT_INIT in libtool 2 in 2008,
+    so it's time to rely on it.
+    
+    Clears autoconf warnings:
+    
+    configure.ac:13: warning: The macro `AC_PROG_LIBTOOL' is obsolete.
+    configure.ac:13: You should run autoupdate.
+    aclocal.m4:3640: AC_PROG_LIBTOOL is expanded from...
+    configure.ac:13: the top level
+    
+    libtoolize: Consider adding 'AC_CONFIG_MACRO_DIRS([m4])' to configure.ac,
+    libtoolize: and rerunning libtoolize and aclocal.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit e0628f5ca2168a413b8b39f20ec62ae4f725bc63
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Feb 25 09:20:43 2023 -0800
+
+    Remove "All rights reserved" from Oracle copyright notices
+    
+    Oracle no longer includes this term in our copyright & license notices.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit dc882ac7b748048f12b033d0d8e5267a6e36036a
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Dec 19 18:17:34 2022 -0800
+
+    libSM 1.2.4
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 12812dca0f852178d8cc3813e4056b396a8f3ab5
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Wed Sep 7 12:44:33 2022 -0700
+
+    Handle arrays too large to fit in iceConn buffers
+    
+    Fixes numerous gcc warnings of the form:
+    
+    sm_client.c: In function ‘SmcOpenConnection’:
+    SMlibint.h:109:25: warning: potential null pointer dereference [-Wnull-dereference]
+         *((CARD32 *) _pBuf) = _val; \
+    SMlibint.h:160:5: note: in expansion of macro ‘STORE_CARD32’
+         STORE_CARD32 (_pBuf, (CARD32) _len); \
+         ^~~~~~~~~~~~
+    sm_client.c:207:5: note: in expansion of macro ‘STORE_ARRAY8’
+         STORE_ARRAY8 (pData, len, previousId);
+         ^~~~~~~~~~~~
+    
+    v2: Raise required libICE version to 1.1.0 to get the updated
+    IceGetHeaderExtra macro definition needed for this to work correctly.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit bb02359ff464d51cbb29d3c93e7e55f3649e5b91
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Dec 4 12:07:40 2022 -0800
+
+    gitlab CI: build current libICE, to meet dependency on >= 1.1.0
+    
+    Allow us to pass CI without waiting for Debian to pick up yesterday's
+    release of libICE 1.1.0.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 6e541c8fa782ca816f8bf78a54eea27dab27e4a2
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Jul 28 17:30:21 2022 -0700
+
+    gitlab CI: stop requiring Signed-off-by in commits
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 449fdba5482549361a4cd6376d877ebd5162988a
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Wed Sep 7 11:07:56 2022 -0700
+
+    SmcCloseConnection: remove unnecessary cast from free()
+    
+    commit b17f93a1d041e63261ff followed the style of the time it was
+    written, before commit e77dd2e4bc8227 had removed them.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit b17f93a1d041e63261ff63419796136a26489549
+Author: Kim Woelders <kim@woelders.dk>
+Date:   Sat Oct 30 10:00:13 2010 +0200
+
+    Fix some potential memory leaks in SmcCloseConnection().
+    
+    Signed-off-by: Kim Woelders <kim@woelders.dk>
+    Reviewed-by: Corbin Simpson <MostAwesomeDude@gmail.com>
+
+commit a32df086f823099a5e0c00b20f0bb965fed5aa60
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 5 10:49:14 2022 -0800
+
+    Add uuid as private dependency to sm.pc for static linking
+    
+    If a uuid.pc file was found, add it to Requires.private.
+    Otherwise, add $LIBUUID_LIBS to Libs.private.
+    
+    Fixes: #1
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit d2076f6a990acc295f2e98bdc2c95649978e7b5f
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 5 08:16:08 2022 -0800
+
+    gitlab CI: add a basic build test
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 0b6048d790499477b6a2907bf3fe755a54cbe68d
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 5 08:09:47 2022 -0800
+
+    Build xz tarballs instead of bzip2
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 56cdb14923310bfa4d393f2acfffeadb04d806c0
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 5 08:09:19 2022 -0800
+
+    Fix spelling/wording issues
+    
+    Found by using:
+        codespell --builtin clear,rare,usage,informal,code,names
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit e6ccf19f8d1f71ef79f192b4ca9debf7280232a3
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Dec 7 19:32:18 2018 -0800
+
+    Update configure.ac bug URL for gitlab migration
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 90df350229d3a687de8d65dc450bceb78eceb014
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Nov 19 17:15:03 2018 -0800
+
+    Update README for gitlab migration
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 82ed8b7d73f306835b951410f5c309a5774ab9d4
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Nov 10 13:19:14 2018 -0800
+
+    Remove obsolete B16 & B32 tags in struct definitions
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
 commit a52c79544fcd6b5e2242b9122dfaa34be07aebb2
 Author: Matthieu Herrb <matthieu@herrb.eu>
 Date:   Sun Sep 30 11:03:41 2018 +0200

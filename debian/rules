@@ -14,16 +14,10 @@ PACKAGE = libsm6
 	dh $@ --with quilt --builddirectory=build/
 
 override_dh_auto_configure-arch: docflags = --disable-docs
-override_dh_auto_configure-indep: docflags = --enable-docs
+override_dh_auto_configure-indep: docflags = --enable-docs --with-xmlto
 override_dh_auto_configure-arch override_dh_auto_configure-indep:
 	dh_auto_configure -- \
 		--with-libuuid \
-		--with-xmlto --without-fop \
+		--without-fop \
 		--docdir=\$${datadir}/doc/libsm-dev \
 		$(docflags)
-
-override_dh_install:
-	dh_install --sourcedir=debian/tmp --fail-missing --exclude=libSM.la
-
-override_dh_strip:
-	dh_strip --dbgsym-migration="$(PACKAGE)-dbg (<< 2:1.2.3-1~)"

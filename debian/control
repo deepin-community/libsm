@@ -3,15 +3,15 @@ Section: x11
 Priority: optional
 Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
 Build-Depends:
- debhelper (>= 11),
- pkg-config,
+ debhelper-compat (= 13),
+ pkgconf,
  x11proto-dev,
  xtrans-dev,
- libice-dev (>= 2:1.0.5),
+ libice-dev (>= 2:1.1.0),
  uuid-dev,
  xutils-dev (>= 1:7.6+2),
  quilt,
-# doc:
+Build-Depends-Indep:
  xmlto (>= 0.0.22), xorg-sgml-doctools (>= 1:1.8), w3m,
 Standards-Version: 4.3.0
 Homepage: https://www.x.org
@@ -36,7 +36,13 @@ Package: libsm-dev
 Section: libdevel
 Architecture: any
 Multi-Arch: same
-Depends: ${shlibs:Depends}, ${misc:Depends}, libsm6 (= ${binary:Version}), x11proto-core-dev, libice-dev (>= 1:1.0.0-1)
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+ libsm6 (= ${binary:Version}),
+ x11proto-dev,
+ libice-dev (>= 1:1.0.0-1),
+ uuid-dev,
 Suggests: libsm-doc
 Description: X11 Session Management library (development headers)
  This package provides the main interface to the X11 Session Management
